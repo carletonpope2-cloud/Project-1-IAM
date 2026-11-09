@@ -1,33 +1,29 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'IAM CloudFormation Template'
+Description: 'IAM CloudFormation'
 
+# IAM Groups and related resources
 Resources:
-  MyIAMUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      UserName: 'CarletonCFN'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AdministratorAccess'
-
-  # MyIAMGroup
-  MyIAMGroup:
+ # Developer IAM Group
+  DeveloperIAMGroup:
     Type: 'AWS::IAM::Group'
     Properties:
-      GroupName: 'CarletonCFNGroup'
-
-  # MyIAM User To Group
-  MyIAMUserToGroupAddition:
+      GroupName: 'DeveloperCFNGroup'
+      Description: 'Full EC2 and S3 access'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonEC2FullAccess'
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+    
+  DeveloperUserToGroupAddition:
     Type: 'AWS::IAM::UserToGroupAddition'
     Properties:
-      GroupName: !Ref MyIAMGroup
+      GroupName: !Ref DeveloperIAMGroup
       Users:
-        - !Ref MyIAMUser
-
-  # MyIAMRole
-  MyIAMRole:
+        - !Ref DeveloperUser
+    
+  DeveloperIAMRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: 'CarletonCFNRole'
+      RoleName: 'DeveloperCFNRole'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -38,20 +34,108 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/PowerUserAccess'
+        - 'arn:aws:iam::aws:policy/AmazonEC2FullAccess'
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
 
-  # S3 Custom Policy
-  MyS3CustomPolicy:
-    Type: 'AWS::IAM::Policy'
+
+# Operations IAM Group
+  OperationsIAMGroup:
+    Type: 'AWS::IAM::Group'
     Properties:
-      PolicyName: 'CarletonCFNS3CustomPolicy'
-      PolicyDocument:
+      GroupName: 'OperationsCFNGroup'
+      Description: 'Full infrastructure access'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
+
+  OperationsUserToGroupAddition:
+    Type: 'AWS::IAM::UserToGroupAddition'
+    Properties:
+      GroupName: !Ref OperationsIAMGroup
+      Users:
+        - !Ref OperationsUser
+
+  OperationsIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'OperationsCFNRole'
+      AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
             Action:
-              - 's3:GetObject'
-            Resource:
-              - '*'
-      Roles:
-        - !Ref MyIAMRole
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
+
+
+# Finance Manager IAM Group
+  FinanceManagerIAMGroup:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: 'FinanceManagerCFNGroup'
+      Description: 'Cost management and billing access'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/Billing'
+
+  FinanceManagerUserToGroupAddition:
+    Type: 'AWS::IAM::UserToGroupAddition'
+    Properties:
+      GroupName: !Ref FinanceManagerIAMGroup
+      Users:
+        - !Ref FinanceManagerUser
+    
+  FinanceManagerIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'FinanceManagerCFNRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/Billing'
+
+
+# Data Analyst IAM Group
+  DataAnalystIAMGroup:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: 'DataAnalystCFNGroup'
+      Description: 'Read-only access to data, S3, RDS, and CloudWatch'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess'
+
+  DataAnalystUserToGroupAddition:
+    Type: 'AWS::IAM::UserToGroupAddition'
+    Properties:
+      GroupName: !Ref DataAnalystIAMGroup
+      Users:
+        - !Ref DataAnalystUser
+
+  DataAnalystIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'DataAnalystCFNRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess'
