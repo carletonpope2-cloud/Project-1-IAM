@@ -3,7 +3,7 @@ Description: 'IAM CloudFormation'
 
 # IAM Groups and related resources
 Resources:
- # Developer IAM Group
+# Developer IAM Group
   DeveloperIAMGroup:
     Type: 'AWS::IAM::Group'
     Properties:
@@ -37,7 +37,6 @@ Resources:
         - 'arn:aws:iam::aws:policy/AmazonEC2FullAccess'
         - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
 
-
 # Operations IAM Group
   OperationsIAMGroup:
     Type: 'AWS::IAM::Group'
@@ -70,7 +69,6 @@ Resources:
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/AdministratorAccess'
 
-
 # Finance Manager IAM Group
   FinanceManagerIAMGroup:
     Type: 'AWS::IAM::Group'
@@ -102,7 +100,6 @@ Resources:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/Billing'
-
 
 # Data Analyst IAM Group
   DataAnalystIAMGroup:
